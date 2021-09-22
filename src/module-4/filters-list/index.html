@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+</head>
+
+<body>
+  <div id="root">
+    <button id="reset">Reset checkboxes</button>
+  </div>
+
+  <script type="module">
+    import FiltersList from './index.js';
+
+    const list = [
+      {
+        value: 'cell_phones',
+        title: 'Cell phones',
+      },
+      {
+        value: 'computers',
+        checked: true,
+        title: 'Computers & Tables',
+      }
+    ];
+
+    const filtersList = new FiltersList({
+      title: 'Category',
+      list
+    });
+
+    root.append(filtersList.element);
+
+    reset.addEventListener('pointerdown', () => {
+      filtersList.reset();
+    });
+
+    filtersList.element.addEventListener('change', event => {
+      console.error('event', event.target.value);
+    });
+  </script>
+</body>
+</html>
