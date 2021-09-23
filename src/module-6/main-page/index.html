@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+
+  <link rel="stylesheet" href="../../module-5/double-slider/style.css">
+
+  <!-- Environment configuration -->
+  <script>
+    window.process = {
+      env: {
+        BACKEND_URL: '',
+        // ... other env variables
+      }
+    }
+  </script>
+
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="module">
+    import Page from './index.js';
+
+    const page = new Page();
+
+    root.append(page.element);
+  </script>
+</body>
+</html>
