@@ -40,3 +40,7 @@
 
 При активації фільтру, компонент повинен зробити `dispatch` події `add-filter`,
 а при деактивації фільтру - події `remove-filter` зі значенням `value`
+
+## Mockup
+
+<https://www.figma.com/file/IhXnvrCvkLAtJYOs7aFx4N/vuesax-ecommerce-page-grid-light>

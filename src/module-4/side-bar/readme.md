@@ -37,3 +37,7 @@
 ## Події компонента
 
 При натисканні на кнопку "clear filters", компонент повинен зробити `dispatch` події `clear-filters`
+
+## Mockup
+
+<https://www.figma.com/file/IhXnvrCvkLAtJYOs7aFx4N/vuesax-ecommerce-page-grid-light>

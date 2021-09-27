@@ -5,25 +5,18 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
-
-  <link rel="stylesheet" href="../../module-5/double-slider/style.css">
-
 </head>
 
 <body>
   <div id="root"></div>
 
   <script type="module">
-    import SideBar from './index.js';
-    import { categoryFilterConfig, brandFilterConfig } from './config.js';
+    import DefaultComponent from './index.js'
 
-    const sideBar = new SideBar(categoryFilterConfig, brandFilterConfig);
+    const component = new DefaultComponent('John');
+    const root = document.getElementById('root');
 
-    root.append(sideBar.element);
-
-    sideBar.element.addEventListener('filter-selected', event => {
-      console.error('event', event.detail);
-    });
+    root.append(component.element);
   </script>
 </body>
 </html>
