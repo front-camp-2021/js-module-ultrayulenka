@@ -1,3 +1,10 @@
+const createNewElement = ({className = "", id = "", tag = ""}) => {
+  const element = document.createElement(tag? tag : "div");
+  if(className) element.className = className;
+  if(id) element.id = id;
+  return element;
+}
+
 export default class Card {
   element;
 
@@ -63,21 +70,20 @@ export default class Card {
     return buttons;
   }
 
-  destroy () {
-    this.element.remove();
-  }
-
   render () {
     this.element = createNewElement({className: "card", id: this.id, tag: this.tag});
     this.element.appendChild(this.createCardInner());
     this.element.appendChild(this.createButtonGroup());
-    return this.element;
   }
-}
 
-const createNewElement = ({className = "", id = "", tag = ""}) => {
-  const element = document.createElement(tag? tag : "div");
-  if(className) element.className = className;
-  if(id) element.id = id;
-  return element;
+  remove () {
+    if (this.element) {
+      this.element.remove();
+    }
+  }
+
+  destroy () {
+    this.remove();
+    this.element = null;
+  }
 }
