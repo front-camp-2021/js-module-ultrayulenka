@@ -51,7 +51,11 @@ export default class Card {
           <h2 class="card__title">
               <a href="#" class="card__link">${this.title}</a>
           </h2>
-          <p class="card__description">Redesigned from scratch and completely revised.</p>
+          <p class="card__description">
+          <a href="#">${this.category}</a> > <a href="#">${this.brand}</a>
+          <br>
+          Redesigned from scratch and completely revised.
+          </p>
       </div>`;
     return cardInner;
   }
@@ -72,6 +76,7 @@ export default class Card {
 
   render () {
     this.element = createNewElement({className: "card", id: this.id, tag: this.tag});
+    this.element.setAttribute("data-element", "body");
     this.element.appendChild(this.createCardInner());
     this.element.appendChild(this.createButtonGroup());
   }
