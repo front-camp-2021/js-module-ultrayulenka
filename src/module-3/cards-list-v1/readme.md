@@ -36,3 +36,10 @@
 
 В комопненті треба передбачити метод `update`, який буде приймати, так само як
 `constructor`, масив об'єктів і оновлювати відображення товарів. 
+<<<<<<< HEAD
+=======
+
+## Mockup
+
+<https://www.figma.com/file/IhXnvrCvkLAtJYOs7aFx4N/vuesax-ecommerce-page-grid-light>
+>>>>>>> upstream/master
