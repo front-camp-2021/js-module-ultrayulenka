@@ -1,12 +1,6 @@
-const createNewElement = ({className = "", id = "", tag = ""}) => {
-  const element = document.createElement(tag? tag : "div");
-  if(className) element.className = className;
-  if(id) element.id = id;
-  return element;
-}
-
 export default class Card {
   element;
+  className = "card";
 
   constructor ({
     id = '',
@@ -30,9 +24,8 @@ export default class Card {
     this.render();
   }
 
-  createCardInner () {
-    const cardInner = createNewElement({className: "card__inner"});
-    cardInner.innerHTML = `
+  get template() {
+    return `<div class="card__inner">
       <div class="card__image">
           <a href="#" class="card__link">
               <img src="${this.images[0]}" alt="">
@@ -43,42 +36,36 @@ export default class Card {
               <div class="rating">
                   <span class="rating__value">${this.rating}</span>
                   <div class="rating__icon">
-                      <img class="rating__icon" src="../../images/star.svg" alt="star">
+                    <img class="rating__icon" src="../../images/star.svg" alt="star">
                   </div>
               </div>
               <span class="card__price">$${this.price}</span>
           </div>
-          <h2 class="card__title">
-              <a href="#" class="card__link">${this.title}</a>
-          </h2>
+          <h2 class="card__title"><a href="#" class="card__link">${this.title}</a></h2>
           <p class="card__description">
-          <a href="#">${this.category}</a> > <a href="#">${this.brand}</a>
-          <br>
-          Redesigned from scratch and completely revised.
+            <a href="#">${this.category}</a> > <a href="#">${this.brand}</a>
+            <br>
+            Redesigned from scratch and completely revised.
           </p>
-      </div>`;
-    return cardInner;
-  }
-
-  createButtonGroup () {
-    const buttons = createNewElement({className: "card__button-group"});
-    buttons.innerHTML = `
-      <button class="button card__button">
-          <img class="button__icon" src="../../images/heart-black.svg" alt="heart">
-          <span class="button__text">wishlist</span>
-      </button>
-      <button class="button card__button button_primary">
-          <img class="button__icon" src="../../images/shopping-bag.svg" alt="shopping bag">
-          <span class="button__text">add to cart</span>
-      </button>`;
-    return buttons;
+      </div>
+    </div>
+    <div class="card__button-group">
+        <button class="button card__button">
+            <img class="button__icon" src="../../images/heart-black.svg" alt="heart">
+            <span class="button__text">wishlist</span>
+        </button>
+        <button class="button card__button button_primary">
+            <img class="button__icon" src="../../images/shopping-bag.svg" alt="shopping bag">
+            <span class="button__text">add to cart</span>
+        </button>
+    </div>`
   }
 
   render () {
-    this.element = createNewElement({className: "card", id: this.id, tag: this.tag});
-    this.element.setAttribute("data-element", "body");
-    this.element.appendChild(this.createCardInner());
-    this.element.appendChild(this.createButtonGroup());
+    this.element = document.createElement(this.tag? this.tag : "div");
+    if(this.className) this.element.className = this.className;
+    if(this.id) this.element.id = this.id;
+    this.element.innerHTML = this.template;
   }
 
   remove () {
