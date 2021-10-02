@@ -18,9 +18,10 @@ export default class CardsList {
   }
 
   renderComponents () {
-    this.data.map(item => {
+    this.data.forEach(item => {
       const listItem = new this.Component({...item, tag: "li"});
       listItem.element.classList.add(this.componentClassName);
+      listItem.element.setAttribute("data-element", "body");
       this.element.append(listItem.element);
     })
   }
