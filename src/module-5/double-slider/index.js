@@ -24,7 +24,7 @@ export default class DoubleSlider {
     this.selected = selected;
     this.title = filterName;
     this.tag = tag;
-    this.calclLeftInPercents(this.selected.from);
+    this.calcLeftInPercents(this.selected.from);
     this.calcRightInPercents(this.selected.to);
 
     this.render();
@@ -44,13 +44,13 @@ export default class DoubleSlider {
     </div>`
   }
 
-  calclLeftInPercents (from) {
+  calcLeftInPercents (from) {
     if(from < this.min) return;
     const res = from - this.min;
     if(this.selected.to - res <= this.min) {
       this.selected.from = this.selected.to;
     } else {
-      this.selected.from = from;
+      this.selected.from = this.roundValue(from);
     };
     const left = (this.selected.from - this.min) / this.range * 100;
     this.left = `${left}%`;
@@ -62,7 +62,7 @@ export default class DoubleSlider {
     if(this.selected.from + res >= this.max) {
       this.selected.to = this.selected.from;
     } else {
-      this.selected.to = to;
+      this.selected.to = this.roundValue(to);
     };
     const right = (this.max - this.selected.to) / this.range * 100;
     this.right = `${right}%`;
@@ -145,10 +145,10 @@ export default class DoubleSlider {
           newFrom = this.selected.to;
         }
       }
-      this.calclLeftInPercents(newFrom);
+      this.calcLeftInPercents(newFrom);
       thumbLeft.style.left = this.left;
       progress.style.left = this.left;
-      fromIndicator.innerHTML = this.formatValue(Math.round(this.selected.from));
+      fromIndicator.innerHTML = this.formatValue(this.selected.from);
     } else if(activeRight) {
       let newRight = rightBoundry - event.clientX;
       let newTo;
@@ -164,7 +164,7 @@ export default class DoubleSlider {
       this.calcRightInPercents(newTo);
       thumbRight.style.right = this.right;
       progress.style.right = this.right;
-      toIndicator.innerHTML = this.formatValue(Math.round(this.selected.to));
+      toIndicator.innerHTML = this.formatValue(this.selected.to);
     }
 
     if(event.clientY - thumbHeight / 2  > bottomBoundry) {
@@ -185,46 +185,31 @@ export default class DoubleSlider {
     this.element.removeEventListener("pointermove", this.onMouseMove);
     this.element.removeEventListener("pointerup", this.onMouseUp);
 
-    this.roundValues();
     this.dispatchRangeEvent();
   }
 
-  roundValues () {
-    const { from, to } = this.selected;
-    if(!(from % this.precision || to % this.precision)) return;
+  roundValue (value) {
+    const newValue = value * Math.pow(10, this.precision);
+    const res = Math.round(newValue) / Math.pow(10, this.precision)
+    return res;
+  }
+
+  reset = () => {
+    this.calcLeftInPercents(this.min);
+    this.calcRightInPercents(this.max);
     const { thumbLeft, thumbRight, progress, toIndicator, fromIndicator } = this.subelements;
-    let mod;
 
-    if(from % this.precision) {
-      mod = from % this.precision;
-      if(mod >= (this.precision / 2)) {
-        this.selected.from = from + this.precision - mod;
-      } else {
-        this.selected.from = from - mod;
-      }
+    thumbLeft.style.left = this.left;
+    progress.style.left = this.left;
+    fromIndicator.innerHTML = this.formatValue(this.selected.from);
 
-      this.calclLeftInPercents(this.selected.from);
-      thumbLeft.style.left = this.left;
-      progress.style.left = this.left;
-      fromIndicator.innerHTML = this.formatValue(this.selected.from);
-    }
-    
-    if(to % this.precision) {
-      mod = to % this.precision;
-      if(mod >= (this.precision / 2)) {
-        this.selected.to = to + this.precision - mod;
-      } else {
-        this.selected.to = to - mod;
-      }
-
-      this.calcRightInPercents(this.selected.to);
-      thumbRight.style.right = this.right;
-      progress.style.right = this.right;
-      toIndicator.innerHTML = this.formatValue(this.selected.to);
-    }
+    thumbRight.style.right = this.right;
+    progress.style.right = this.right;
+    toIndicator.innerHTML = this.formatValue(this.selected.to);
   }
 
   removeEvents () {
+    const { thumbLeft, thumbRight } = this.subelements;
     thumbLeft.removeEventListener("pointerdown", this.onActiveLeft);
     thumbRight.removeEventListener("pointerdown", this.onActiveRight);
     this.element.removeEventListener("pointermove", this.onMouseMove);
@@ -246,6 +231,5 @@ export default class DoubleSlider {
   destroy () {
     this.remove();
     this.element = null;
-    this.subelements = null;
   }
 }
