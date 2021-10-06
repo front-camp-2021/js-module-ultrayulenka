@@ -1,9 +1,11 @@
 import FiltersList from '../filters-list/index.js';
+import DoubleSlider from '../../module-5/double-slider/index.js';
 
 export default class SideBar {
   element;
   listElement;
   filters = [];
+  sliders = [];
   btnClear;
   selectedFilters = [];
 
@@ -39,9 +41,18 @@ export default class SideBar {
     this.element.innerHTML = this.template;
     this.listElement = this.element.querySelector("ul");
     this.btnClear = this.element.querySelector("#clear-filters");
-
+    this.renderDoubleSlider({
+      props: { 
+        min: 0, 
+        max: 85000,
+        precision: 0, 
+        formatValue: value => value + " UAH"
+      },
+      title: "Price" 
+    });
     if(this.categoriesFilter.length) this.renderFilter({title: "Category", list: this.categoriesFilter});
     if(this.brandFilter.length) this.renderFilter({title: "Brand", list: this.brandFilter});
+    this.renderDoubleSlider({props: { min: 0, max: 5, precision: 2 }, title: "Rating" });
   }
 
   addEvents () {
@@ -59,6 +70,7 @@ export default class SideBar {
   onClearFiltersClick = () => {
     this.selectedFilters = [];
     this.resetFilters();
+    this.resetSliders();
     const newEvent = new CustomEvent("clear-filters", { bubbles: true });
     this.element.dispatchEvent(newEvent);
   }
@@ -88,10 +100,20 @@ export default class SideBar {
     this.filters.forEach(filterItem => filterItem.reset());
   }
 
+  resetSliders () {
+    this.sliders.forEach( slider => slider.reset());
+  }
+
   renderFilter ({list, title = ""}) {
     const filterItem = new FiltersList({ list, title, tag: "li" });
     this.filters.push(filterItem);
     this.listElement.append(filterItem.element);
+  }
+
+  renderDoubleSlider({props, title = ""}) {
+    const slider = new DoubleSlider({ ...props, filterName: title, tag: "li"});
+    this.sliders.push(slider);
+    this.listElement.append(slider.element);
   }
 
   remove () {
@@ -107,6 +129,5 @@ export default class SideBar {
     this.listElement = null;
     this.filters = [];
     this.btnClear = null;
-    this.selectedFilters = [];
   }
 }
