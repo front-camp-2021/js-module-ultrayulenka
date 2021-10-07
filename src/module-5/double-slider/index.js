@@ -24,8 +24,8 @@ export default class DoubleSlider {
     this.selected = selected;
     this.title = filterName;
     this.tag = tag;
-    this.calcLeftInPercents(this.selected.from);
-    this.calcRightInPercents(this.selected.to);
+    this.left = this.calcLeft(this.selected.from);
+    this.right = this.calcRight(this.selected.to);
 
     this.render();
     this.addEvents();
@@ -36,36 +36,65 @@ export default class DoubleSlider {
     <div class="range-slider">
       <span data-element="from">${this.formatValue(this.selected.from)}</span>
       <div class="range-slider__inner" data-element="slider">
-        <span data-element="progress" class="range-slider__progress" style="left: ${this.left}; right: ${this.right}"></span>
-        <span data-element="thumbLeft" class="range-slider__thumb-left" style="left: ${this.left}"></span>
-        <span data-element="thumbRight" class="range-slider__thumb-right" style="right: ${this.right}"></span>
+        <span data-element="progress" class="range-slider__progress" style="left: ${this.left}%; right: ${this.right}%"></span>
+        <span data-element="thumbLeft" class="range-slider__thumb-left" style="left: ${this.left}%"></span>
+        <span data-element="thumbRight" class="range-slider__thumb-right" style="right: ${this.right}%"></span>
       </div>
       <span data-element="to">${this.formatValue(this.selected.to)}</span>
     </div>`
   }
 
-  calcLeftInPercents (from) {
-    if(from < this.min) return;
+
+  updateFromValue (from) {
+    if(from < this.min) {
+      this.selected.from = this.min;
+      return;
+    } 
     const res = from - this.min;
     if(this.selected.to - res <= this.min) {
       this.selected.from = this.selected.to;
     } else {
       this.selected.from = this.roundValue(from);
-    };
-    const left = (this.selected.from - this.min) / this.range * 100;
-    this.left = `${left}%`;
+    }
   }
 
-  calcRightInPercents (to) {
-    if(to > this.max) return;
+  updateToValue (to) {
+    if(to > this.max) {
+      this.selected.to = this.max
+      return;
+    }
     const res = this.max - to;
     if(this.selected.from + res >= this.max) {
       this.selected.to = this.selected.from;
     } else {
       this.selected.to = this.roundValue(to);
     };
-    const right = (this.max - this.selected.to) / this.range * 100;
-    this.right = `${right}%`;
+  }
+
+  calcLeft ({min = this.min, from = this.selected.from, range = this.range}) {
+    const left = from - min <= 0? 0 : (from - min) / range * 100;
+    if(left + this.right > 100) return 100 - this.right;
+    return left;
+  }
+
+  calcRight ({max = this.max , to = this.selected.to, range = this.range}) {
+    const right = max - to <= 0? 0 : (max - to) / range * 100;
+    if(right + this.left > 100) return 100 - this.left;
+    return right;
+  }
+
+  updateLeftValues () {
+    const { thumbLeft, progress, fromIndicator } = this.subelements;
+    thumbLeft.style.left = `${this.left}%`;
+    progress.style.left = `${this.left}%`;
+    fromIndicator.innerHTML = this.formatValue(this.selected.from);
+  }
+
+  updateRightValues () {
+    const { thumbRight, progress, toIndicator } = this.subelements;
+    thumbRight.style.right = `${this.right}%`;
+    progress.style.right = `${this.right}%`
+    toIndicator.innerHTML = this.formatValue(this.selected.to);
   }
 
   render () {
@@ -129,45 +158,29 @@ export default class DoubleSlider {
   }
 
   onMouseMove = (event) => {
-    const { thumbLeft, thumbRight, progress, toIndicator, fromIndicator } = this.subelements;
-    const thumbHeight = thumbLeft.getBoundingClientRect().height;
+    const { thumbLeft } = this.subelements;
+    if(!this.thumbWidth) this.thumbWidth = thumbLeft.getBoundingClientRect().width;
+    if(!this.thumbHeight)  this.thumbHeight = thumbLeft.getBoundingClientRect().height;
     const { activeLeft, activeRight } = this.isActive;
     const { fullWidth, leftBoundry, rightBoundry, bottomBoundry} = this.getSliderProps();
+
     if(activeLeft) {
-      let newLeft = event.clientX - leftBoundry;
-      let newFrom;
-      if(newLeft < 0) {
-        newLeft = 0;
-        newFrom = this.min;
-      } else {
-        newFrom = this.min + (newLeft / fullWidth * this.range);
-        if(newFrom >= this.selected.to) {
-          newFrom = this.selected.to;
-        }
-      }
-      this.calcLeftInPercents(newFrom);
-      thumbLeft.style.left = this.left;
-      progress.style.left = this.left;
-      fromIndicator.innerHTML = this.formatValue(this.selected.from);
-    } else if(activeRight) {
-      let newRight = rightBoundry - event.clientX;
-      let newTo;
-      if(newRight < 0) {
-        newRight = 0;
-        newTo = this.max;
-      } else {
-        newTo = this.max - (newRight / fullWidth * this.range);
-        if(newTo <= this.selected.from) {
-          newTo = this.selected.from;
-        }
-      }
-      this.calcRightInPercents(newTo);
-      thumbRight.style.right = this.right;
-      progress.style.right = this.right;
-      toIndicator.innerHTML = this.formatValue(this.selected.to);
+      const shiftX = event.clientX - leftBoundry;
+      this.left = this.calcLeft({ min: leftBoundry, from: (event.clientX + this.thumbWidth), range: fullWidth });
+      const newFrom = this.min + (shiftX / fullWidth * this.range);
+      this.updateFromValue(newFrom);
+      this.updateLeftValues();
+    }
+    
+    if(activeRight) {
+      const shiftX = rightBoundry - event.clientX;
+      this.right = this.calcRight({ max: rightBoundry, to: event.clientX, range: fullWidth })
+      const newTo = this.max - (shiftX / fullWidth * this.range)
+      this.updateToValue (newTo);
+      this.updateRightValues();
     }
 
-    if(event.clientY - thumbHeight / 2  > bottomBoundry) {
+    if(event.clientY - this.thumbHeight / 2  > bottomBoundry) {
       this.element.dispatchEvent(new MouseEvent('pointerup', { bubbles: true }));
     }
   }
@@ -195,17 +208,12 @@ export default class DoubleSlider {
   }
 
   reset = () => {
-    this.calcLeftInPercents(this.min);
-    this.calcRightInPercents(this.max);
-    const { thumbLeft, thumbRight, progress, toIndicator, fromIndicator } = this.subelements;
-
-    thumbLeft.style.left = this.left;
-    progress.style.left = this.left;
-    fromIndicator.innerHTML = this.formatValue(this.selected.from);
-
-    thumbRight.style.right = this.right;
-    progress.style.right = this.right;
-    toIndicator.innerHTML = this.formatValue(this.selected.to);
+    this.selected.from = this.min;
+    this.selected.to = this.max;
+    this.left = this.calcLeft({ from: this.min});
+    this.right = this.calcRight({ to: this.max });
+    this.updateLeftValues();
+    this.updateRightValues();
   }
 
   removeEvents () {
