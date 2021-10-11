@@ -1,5 +1,7 @@
 export default class Pagination {
   element;
+  subElements = {};
+  current;
   start = 0;
   pageIndex = 0;
   className = "page-navigation";
@@ -10,6 +12,7 @@ export default class Pagination {
   } = {}) {
     this.totalPages = totalPages;
     this.pageIndex = page - 1;
+    if(this.pageIndex < this.start) this.pageIndex = this.start;
 
     this.render();
     this.addEvents();
@@ -19,14 +22,19 @@ export default class Pagination {
     this.element = document.createElement("nav");
     this.element.className = this.className;
     this.element.innerHTML = this.template;
-    this.subelements = this.getSubelements();
-    this.renderListItems();
-    this.current = this.element.querySelector(".page-navigation__item_current");
+    this.subElements = this.getSubElements();
+    if(!this.totalPages) {
+      const message = `<li>No pagination</li>`
+      this.subElements.listElement.innerHTML = message;
+    } else {
+      this.renderListItems();
+      this.current = this.element.querySelector(".page-navigation__item_current");
+    }
   }
 
   renderListItems () {
-    const { listElement } = this.subelements;
-    for(let i = 1; i <= this.totalPages; i++) {
+    const { listElement } = this.subElements;
+    for(let i = this.start + 1; i <= this.totalPages; i++) {
       const wrapper = document.createElement('div');
       wrapper.innerHTML = `<li class="page-navigation__item">
         <a href="#" class="page-navigation__page-link">${i}</a>
@@ -48,7 +56,7 @@ export default class Pagination {
     <a class="page-navigation__page-link" id="next-page"></a>`
   }
 
-  getSubelements () {
+  getSubElements () {
     const listElement = this.element.querySelector('[data-element="pages-list"]');
     const prevBtn = this.element.querySelector("#prev-page");
     const nextBtn = this.element.querySelector("#next-page");
@@ -59,24 +67,39 @@ export default class Pagination {
     }
   }
 
+  update(totalPages) {
+    const { listElement } = this.subElements;
+    this.totalPages = totalPages;
+    this.pageIndex = this.start;
+    listElement.innerHTML = "";
+
+    if(!this.totalPages) {
+      const message = `<li>No pagination</li>`
+      listElement.innerHTML = message;
+    } else {
+      this.renderListItems();
+      this.current = this.element.querySelector(".page-navigation__item_current");
+    }
+  }
+
   addEvents () {
-    const { listElement, prevBtn, nextBtn } = this.subelements;
-    prevBtn.addEventListener("pointerup", this.goToPrevPage);
-    nextBtn.addEventListener("pointerup", this.goToNextPage);
-    listElement.addEventListener("pointerup", this.goToPage);
+    const { listElement, prevBtn, nextBtn } = this.subElements;
+    prevBtn.addEventListener("click", this.goToPrevPage);
+    nextBtn.addEventListener("click", this.goToNextPage);
+    listElement.addEventListener("click", this.goToPage);
   }
 
   removeEvents () {
-    const { listElement, prevBtn, nextBtn } = this.subelements;
-    prevBtn.removeEventListener("pointerup", this.goToPrevPage);
-    nextBtn.removeEventListener("pointerup", this.goToNextPage);
-    listElement.removeEventListener("pointerup", this.goToPage);
+    const { listElement, prevBtn, nextBtn } = this.subElements;
+    prevBtn.removeEventListener("click", this.goToPrevPage);
+    nextBtn.removeEventListener("click", this.goToNextPage);
+    listElement.removeEventListener("click", this.goToPage);
   }
 
   goToPrevPage = (event) => {
     event.preventDefault();
     if(this.pageIndex <= 0) return;
-    const { listElement } = this.subelements;
+    const { listElement } = this.subElements;
     this.resetClasses();
     this.pageIndex = this.pageIndex - 1;
     this.current = listElement.children[this.pageIndex];
@@ -87,7 +110,7 @@ export default class Pagination {
   goToNextPage = (event) => {
     event.preventDefault();
     if(this.pageIndex >= this.totalPages - 1) return;
-    const { listElement } = this.subelements;
+    const { listElement } = this.subElements;
     this.resetClasses();
     this.pageIndex = this.pageIndex + 1;
     this.current = listElement.children[this.pageIndex];
@@ -97,7 +120,7 @@ export default class Pagination {
 
   goToPage = (event) => {
     event.preventDefault();
-    const { listElement } = this.subelements;
+    const { listElement } = this.subElements;
     const item = event.target.closest(".page-navigation__item");
     if(item) {
       if(item === this.current) return;
@@ -122,7 +145,7 @@ export default class Pagination {
   }
 
   dispatchPageEvent () {
-    const newEvent = new CustomEvent("page-changed", { bubbles: true, detail: this.pageIndex });
+    const newEvent = new CustomEvent("page-changed", { bubbles: true, detail: this.pageIndex + 1 });
     this.element.dispatchEvent(newEvent);
   }
 
@@ -133,8 +156,16 @@ export default class Pagination {
     }
   }
 
-  destroy () {
+  destroy  = () => {
     this.remove();
     this.element = null;
+
+    for(let element of Object.values(this.subElements)) {
+      element = null;
+    }
+
+    this.subElements = {};
+
+    this.current = null;
   }
 }

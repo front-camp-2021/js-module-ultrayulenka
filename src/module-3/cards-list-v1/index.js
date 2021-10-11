@@ -13,8 +13,13 @@ export default class CardsList {
   render () {
     this.element = document.createElement("ul");
     this.element.className = this.className;
-    if(typeof this.Component === 'object' || !this.data.length ) return;
-    this.renderComponents();
+    if(typeof this.Component === 'object') return;
+    if(!this.data.length) {
+      const message = "No products found";
+      this.element.append(message);
+    } else {
+      this.renderComponents();
+    }
   }
 
   renderComponents () {
@@ -30,7 +35,12 @@ export default class CardsList {
     if (!this.element) return;
     this.element.innerHTML = "";
     this.data = data;
-    if(data) this.renderComponents();
+    if(!this.data.length) {
+      const message = "No products found";
+      this.element.append(message);
+    } else {
+      this.renderComponents();
+    }
   }
 
   remove () {

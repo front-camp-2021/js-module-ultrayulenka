@@ -93,7 +93,7 @@ describe('DoubleSlider', () => {
     leftSlider.dispatchEvent(down);
     leftSlider.dispatchEvent(move);
     leftSlider.dispatchEvent(up);
-    
+
     expect(leftBoundary).toHaveTextContent(doubleSlider.min);
   });
 

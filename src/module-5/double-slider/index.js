@@ -1,5 +1,6 @@
 export default class DoubleSlider {
   element;
+  subElements = {};
   range = 0;
   className = "filter-item";
   isActive = { activeLeft: false, activeRight: false };
@@ -26,6 +27,8 @@ export default class DoubleSlider {
     this.tag = tag;
     this.left = this.calcLeft(this.selected.from);
     this.right = this.calcRight(this.selected.to);
+    this.thumbProps = null;
+    this.sliderProps = null;
 
     this.render();
     this.addEvents();
@@ -84,14 +87,14 @@ export default class DoubleSlider {
   }
 
   updateLeftValues () {
-    const { thumbLeft, progress, fromIndicator } = this.subelements;
+    const { thumbLeft, progress, fromIndicator } = this.subElements;
     thumbLeft.style.left = `${this.left}%`;
     progress.style.left = `${this.left}%`;
     fromIndicator.innerHTML = this.formatValue(this.selected.from);
   }
 
   updateRightValues () {
-    const { thumbRight, progress, toIndicator } = this.subelements;
+    const { thumbRight, progress, toIndicator } = this.subElements;
     thumbRight.style.right = `${this.right}%`;
     progress.style.right = `${this.right}%`
     toIndicator.innerHTML = this.formatValue(this.selected.to);
@@ -101,10 +104,10 @@ export default class DoubleSlider {
     this.element = document.createElement(this.tag? this.tag : "div");
     this.element.className = this.className;
     this.element.innerHTML = this.template;
-    this.subelements = this.getSubelements();
+    this.subElements = this.getSubElements();
   }
 
-  getSubelements () {
+  getSubElements () {
     const progress = this.element.querySelector('[data-element="progress"]');
     const thumbLeft = this.element.querySelector('[data-element="thumbLeft"]');
     const thumbRight = this.element.querySelector('[data-element="thumbRight"]');
@@ -121,22 +124,32 @@ export default class DoubleSlider {
     };
   }
 
-  getSliderProps () {
-    const { slider } = this.subelements;
+  setSliderProps () {
+    const { slider } = this.subElements;
     const fullWidth = slider.getBoundingClientRect().width;
     const leftBoundry = slider.getBoundingClientRect().left;
     const rightBoundry = slider.getBoundingClientRect().right;
     const bottomBoundry = slider.getBoundingClientRect().y;
-    return {
+    this.sliderProps = {
       fullWidth,
       leftBoundry,
       rightBoundry,
       bottomBoundry
-    };
+    }
+  }
+
+  setThumbProps () {
+    const { thumbLeft } = this.subElements;
+    const thumbWidth = thumbLeft.getBoundingClientRect().width;
+    const thumbHeight = thumbLeft.getBoundingClientRect().height;
+    this.thumbProps = {
+      thumbWidth,
+      thumbHeight
+    }
   }
 
   addEvents () {
-    const { thumbLeft, thumbRight } = this.subelements;
+    const { thumbLeft, thumbRight } = this.subElements;
     thumbLeft.addEventListener("pointerdown", this.onActiveLeft);
     thumbRight.addEventListener("pointerdown", this.onActiveRight);
   }
@@ -158,15 +171,17 @@ export default class DoubleSlider {
   }
 
   onMouseMove = (event) => {
-    const { thumbLeft } = this.subelements;
-    if(!this.thumbWidth) this.thumbWidth = thumbLeft.getBoundingClientRect().width;
-    if(!this.thumbHeight)  this.thumbHeight = thumbLeft.getBoundingClientRect().height;
     const { activeLeft, activeRight } = this.isActive;
-    const { fullWidth, leftBoundry, rightBoundry, bottomBoundry} = this.getSliderProps();
+
+    if(!this.thumbProps) this.setThumbProps();
+    const { thumbWidth, thumbHeight } = this.thumbProps;
+
+    if(!this.sliderProps) this.setSliderProps();
+    const { fullWidth, leftBoundry, rightBoundry, bottomBoundry} = this.sliderProps;
 
     if(activeLeft) {
       const shiftX = event.clientX - leftBoundry;
-      this.left = this.calcLeft({ min: leftBoundry, from: (event.clientX + this.thumbWidth), range: fullWidth });
+      this.left = this.calcLeft({ min: leftBoundry, from: (event.clientX + thumbWidth), range: fullWidth });
       const newFrom = this.min + (shiftX / fullWidth * this.range);
       this.updateFromValue(newFrom);
       this.updateLeftValues();
@@ -180,13 +195,13 @@ export default class DoubleSlider {
       this.updateRightValues();
     }
 
-    if(event.clientY - this.thumbHeight / 2  > bottomBoundry) {
+    if(event.clientY - thumbHeight / 2  > bottomBoundry) {
       this.element.dispatchEvent(new MouseEvent('pointerup', { bubbles: true }));
     }
   }
 
   onMouseUp = () => {
-    const { thumbLeft, thumbRight } = this.subelements;
+    const { thumbLeft, thumbRight } = this.subElements;
     if(this.isActive.activeLeft) {
       this.isActive.activeLeft = false;
       thumbLeft.classList.remove("range-slider_dragging");
@@ -217,11 +232,9 @@ export default class DoubleSlider {
   }
 
   removeEvents () {
-    const { thumbLeft, thumbRight } = this.subelements;
+    const { thumbLeft, thumbRight } = this.subElements;
     thumbLeft.removeEventListener("pointerdown", this.onActiveLeft);
     thumbRight.removeEventListener("pointerdown", this.onActiveRight);
-    this.element.removeEventListener("pointermove", this.onMouseMove);
-    this.element.removeEventListener("pointerup", this.onMouseUp);
   }
 
   dispatchRangeEvent() {
@@ -239,5 +252,11 @@ export default class DoubleSlider {
   destroy () {
     this.remove();
     this.element = null;
+
+    for(let element of Object.values(this.subElements)) {
+      element = null;
+    }
+
+    this.subElements = {};
   }
 }

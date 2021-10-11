@@ -39,7 +39,7 @@ export default class Card {
                     <img class="rating__icon" src="../../images/star.svg" alt="star">
                   </div>
               </div>
-              <span class="card__price">$${this.price}</span>
+              <span class="card__price">${this.price}</span>
           </div>
           <h2 class="card__title"><a href="#" class="card__link">${this.title}</a></h2>
           <p class="card__description">

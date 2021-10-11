@@ -3,10 +3,9 @@ import DoubleSlider from '../../module-5/double-slider/index.js';
 
 export default class SideBar {
   element;
-  listElement;
+  subElements = {};
   filters = [];
   sliders = [];
-  btnClear;
   selectedFilters = [];
 
   constructor (categoriesFilter = [], brandFilter = []) {
@@ -39,8 +38,9 @@ export default class SideBar {
     this.element = document.createElement("aside");
     this.element.className = "sidebar";
     this.element.innerHTML = this.template;
-    this.listElement = this.element.querySelector("ul");
-    this.btnClear = this.element.querySelector("#clear-filters");
+    
+    this.subElements = this.getSubElements();
+
     this.renderDoubleSlider({
       props: { 
         min: 0, 
@@ -55,22 +55,35 @@ export default class SideBar {
     this.renderDoubleSlider({props: { min: 0, max: 5, precision: 2 }, title: "Rating" });
   }
 
+  getSubElements () {
+    const listElement = this.element.querySelector("ul");
+    const btnClear = this.element.querySelector("#clear-filters");
+
+    return {
+      listElement,
+      btnClear
+    }
+  }
+
   addEvents () {
-    this.btnClear.addEventListener("click", this.onClearFiltersClick);
+    const { btnClear } = this.subElements;
+
+    btnClear.addEventListener("click", this.onClearFiltersClick);
     this.element.addEventListener("add-filter", this.onAddFilter);
     this.element.addEventListener("remove-filter", this.onRemoveFilter);
   }
 
   removeEvents () {
-    this.btnClear.removeEventListener("click", this.onClearFiltersClick);
+    const { btnClear } = this.subElements;
+
+    btnClear.removeEventListener("click", this.onClearFiltersClick);
     this.element.removeEventListener("add-filter", this.onAddFilter);
     this.element.removeEventListener("remove-filter", this.onRemoveFilter);
   }
 
   onClearFiltersClick = () => {
     this.selectedFilters = [];
-    this.resetFilters();
-    this.resetSliders();
+    this.reset();
     const newEvent = new CustomEvent("clear-filters", { bubbles: true });
     this.element.dispatchEvent(newEvent);
   }
@@ -87,33 +100,31 @@ export default class SideBar {
 
     this.selectedFilters.splice(index, 1);
 
-    let newEvent;
-    if(this.selectedFilters.length === 0) {
-      newEvent = new CustomEvent("clear-filters", { bubbles: true });
-    } else {
-      newEvent = new CustomEvent("filter-selected", { bubbles: true, detail: this.selectedFilters });
-    }
+    const newEvent = new CustomEvent("filter-selected", { bubbles: true, detail: this.selectedFilters });
     this.element.dispatchEvent(newEvent);
   }
 
-  resetFilters () {
+  reset () {
     this.filters.forEach(filterItem => filterItem.reset());
-  }
-
-  resetSliders () {
     this.sliders.forEach( slider => slider.reset());
   }
 
   renderFilter ({list, title = ""}) {
+    const { listElement } = this.subElements;
+
     const filterItem = new FiltersList({ list, title, tag: "li" });
     this.filters.push(filterItem);
-    this.listElement.append(filterItem.element);
+    
+    listElement.append(filterItem.element);
   }
 
   renderDoubleSlider({props, title = ""}) {
+    const { listElement } = this.subElements;
+
     const slider = new DoubleSlider({ ...props, filterName: title, tag: "li"});
     this.sliders.push(slider);
-    this.listElement.append(slider.element);
+
+    listElement.append(slider.element);
   }
 
   remove () {
@@ -126,8 +137,23 @@ export default class SideBar {
   destroy () {
     this.remove();
     this.element = null;
-    this.listElement = null;
+
+    for(let element of Object.values(this.subElements)) {
+      element = null;
+    }
+
+    this.subElements = {};
+
+    this.filters.forEach(filter => {
+      filter.destroy();
+    });
+
     this.filters = [];
-    this.btnClear = null;
+
+    this.sliders.forEach(slider => {
+      slider.destroy();
+    });
+
+    this.sliders = [];
   }
 }
