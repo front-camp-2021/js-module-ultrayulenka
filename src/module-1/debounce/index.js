@@ -5,8 +5,8 @@ export const debounce = (fn, delay = 0) => {
       cooldown = true;
       setTimeout(() => {
         cooldown = false;
+        fn.call(this, ...args);
       }, delay);
-      return fn.call(this, ...args);
     };
   }
 
