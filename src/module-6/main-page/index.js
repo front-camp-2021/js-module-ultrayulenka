@@ -108,11 +108,11 @@ export default class Page {
   }
 
   onPageChanged = (event) => {
-    const { cardsList } = this.components;
     this.page = event.detail;
     this.filters.set('_page', this.page);
-    this.getProducts(this.filters).then((products) => {
-      cardsList.update(products);
+
+    this.getProducts(this.filters).then(({ products }) => {
+      this.updateCardsList(products);
     })
   }
 
@@ -122,8 +122,7 @@ export default class Page {
     this.filters.set('q', searchContent);
     this.filters.set("_page", this.page);
 
-    this.updatePagination();
-    this.updateCardsList();
+    this.update();
   }
 
   onRangeChange = (event) => {
@@ -134,13 +133,13 @@ export default class Page {
     this.filters.set(`${name}_lte`, value.to);
     this.filters.set("_page", this.page)
 
-    this.updatePagination();
-    this.updateCardsList();
+    this.update();
   }
 
   onFilterSelected = (event) => {
     const entries = event.detail.map(item => item.split("="));
     this.page = 1;
+    this.filters.set("_page", this.page);
 
     for(let key of Object.keys(this.filtersList)) {
       this.filtersList[key] = [];
@@ -161,8 +160,7 @@ export default class Page {
       }
     }
 
-    this.updatePagination();
-    this.updateCardsList();
+    this.update();
   }
 
   onClearFilters = () => {
@@ -174,30 +172,26 @@ export default class Page {
     const { search } = this.components;
     search.reset();
 
-    this.updatePagination();
-    this.updateCardsList();
+    this.update();
   }
 
-  updatePagination () {
+  update () {
+    this.getProducts(this.filters).then(({ products, totalPages }) => {
+      this.totalPages = totalPages;
+      const pagesAmount = Math.ceil(this.totalPages / this.pageLimit);
+      this.updatePagination(pagesAmount);
+      this.updateCardsList(products);
+    });
+  }
+
+  updatePagination (pagesAmount) {
     const { pagination } = this.components;
-    const search = new URLSearchParams();
-    for(let pair of this.filters.entries()) {
-      const [ key, value ] = pair;
-      if(key !== "_limit" && key!== "_page") {
-        search.append(key, value);
-      }
-    }
-    this.getProducts(search).then(products => {
-      const pagesAmount = Math.ceil(products.length / this.pageLimit);
-      pagination.update(pagesAmount);
-    });
+    pagination.update(pagesAmount);
   }
 
-  updateCardsList () {
+  updateCardsList (products) {
     const { cardsList } = this.components;
-    this.getProducts(this.filters).then(products => {
-      cardsList.update(products);
-    });
+    cardsList.update(products);
   }
 
   renderPagination () {
@@ -224,7 +218,7 @@ export default class Page {
   }
 
   renderCardsList () {
-    this.getProducts(this.filters).then((products) => {
+    this.getProducts(this.filters).then(({ products }) => {
       this.components.cardsList = new CardsList({data: products, Component: Card});
       const { cardsList } = this.components;
       const { main } = this.subElements;
@@ -233,27 +227,28 @@ export default class Page {
   }
 
   async getFilters () {
-    const categories = await this.getResource(new URL("categories", BACKEND_URL));
+    const [categories] = await this.getResource(new URL("categories", BACKEND_URL));
     this.categoriesFilter = categories? prepareFilters(categories, "category") : [];
-    const brands = await this.getResource(new URL("brands", BACKEND_URL));
+    const [brands] = await this.getResource(new URL("brands", BACKEND_URL));
     this.brandFilter = brands? prepareFilters(brands, "brand") : [];
   }
 
   async getProducts (search = "") {
     const url = new URL("products", BACKEND_URL);
     if(search) url.search = search;
-    const products = await this.getResource(url);
-    const result = products? products : [];
-    return result;
+    const [result, headers] = await this.getResource(url);
+    const products = result? result : [];
+    const totalPages = headers? Number(headers.get("X-Total-Count")) : 0;
+    return { products, totalPages };
   }
 
   async getResource (url) {
-    const [data, error] = await request(url);
+    const [data, error, headers] = await request(url);
     if(error) {
       console.error(`${error}: failed to load resource from ${url}`);
-      return null;
+      return [null, null];
     } else {
-      return data;
+      return [data, headers];
     }
   }
 
