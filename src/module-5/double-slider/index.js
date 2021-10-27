@@ -6,16 +6,16 @@ export default class DoubleSlider {
   isActive = { activeLeft: false, activeRight: false };
 
   constructor({
-    min = 100,
-    max = 200,
+    min = 0,
+    max = 0,
     formatValue = value => value,
     selected = {
       from: min,
       to: max
     },
-    precision = 1,
+    precision = 0,
     filterName = '',
-    tag = ''
+    tag = 'div'
   } = {}) {
     this.min = min;
     this.max = max;
@@ -101,7 +101,7 @@ export default class DoubleSlider {
   }
 
   render () {
-    this.element = document.createElement(this.tag? this.tag : "div");
+    this.element = document.createElement(this.tag);
     this.element.className = this.className;
     this.element.innerHTML = this.template;
     this.subElements = this.getSubElements();

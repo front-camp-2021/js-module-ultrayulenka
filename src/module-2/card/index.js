@@ -10,7 +10,7 @@ export default class Card {
     price = 0,
     category = '',
     brand = '',
-    tag = ''
+    tag = 'div'
   } = {}) {
     this.id = id;
     this.images = images;
@@ -62,7 +62,7 @@ export default class Card {
   }
 
   render () {
-    this.element = document.createElement(this.tag? this.tag : "div");
+    this.element = document.createElement(this.tag);
     if(this.className) this.element.className = this.className;
     if(this.id) this.element.id = this.id;
     this.element.innerHTML = this.template;

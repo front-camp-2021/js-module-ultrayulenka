@@ -8,7 +8,7 @@ export default class FiltersList {
   constructor ({
      title = '',
      list = [],
-     tag = ''
+     tag = 'div'
   } = {}) {
     this.title = title;
     this.list = list;
@@ -19,7 +19,7 @@ export default class FiltersList {
   }
 
   render () {
-    this.element = document.createElement(this.tag? this.tag : "div");
+    this.element = document.createElement(this.tag);
     this.element.className = this.className;
     this.element.innerHTML = `<h4 class="filter-item__title">${this.title}</h4>`;
     if(this.list.length) this.renderList();

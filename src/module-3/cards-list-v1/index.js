@@ -3,7 +3,7 @@ export default class CardsList {
   className = "cards-list";
   componentClassName = "cards-list__item";
 
-  constructor ({data = [], Component = {}}) {
+  constructor ({data = [], Component = null}) {
     this.data = data;
     this.Component = Component;
 
@@ -13,16 +13,21 @@ export default class CardsList {
   render () {
     this.element = document.createElement("ul");
     this.element.className = this.className;
-    if(typeof this.Component === 'object') return;
-    if(!this.data.length) {
-      const message = "No products found";
-      this.element.append(message);
-    } else {
-      this.renderComponents();
-    }
+    this.renderComponents();
   }
 
   renderComponents () {
+    if(!this.data.length) {
+      this.element.append("No products found");
+      return;
+    }
+
+    if(this.Component === null) {
+      this.element.append("Something went wrong...");
+      console.error("Component is invalid");
+      return;
+    }
+
     this.data.forEach(item => {
       const listItem = new this.Component({...item, tag: "li"});
       listItem.element.classList.add(this.componentClassName);
@@ -35,12 +40,7 @@ export default class CardsList {
     if (!this.element) return;
     this.element.innerHTML = "";
     this.data = data;
-    if(!this.data.length) {
-      const message = "No products found";
-      this.element.append(message);
-    } else {
-      this.renderComponents();
-    }
+    this.renderComponents();
   }
 
   remove () {

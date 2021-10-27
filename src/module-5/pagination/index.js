@@ -7,8 +7,8 @@ export default class Pagination {
   className = "page-navigation";
 
   constructor({
-    totalPages = 10,
-    page = 1,
+    totalPages = 0,
+    page = 0,
   } = {}) {
     this.totalPages = totalPages;
     this.pageIndex = page - 1;

@@ -28,5 +28,8 @@
     "json-server": "^0.16.3",
     "pretty-format": "^26.6.2",
     "static-server": "^2.2.1"
+  },
+  "dependencies": {
+    "enzyme": "^3.11.0"
   }
 }
