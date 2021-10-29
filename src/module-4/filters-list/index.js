@@ -22,7 +22,9 @@ export default class FiltersList {
     this.element = document.createElement(this.tag);
     this.element.className = this.className;
     this.element.innerHTML = `<h4 class="filter-item__title">${this.title}</h4>`;
-    if(this.list.length) this.renderList();
+    if(this.list.length) {
+      this.renderList();
+    }
   }
 
   renderList () {
@@ -55,12 +57,13 @@ export default class FiltersList {
 
   onChange = (event) => {
     if(event.target.type !== "checkbox") return;
-    let newEvent;
-    if(event.target.checked) {
-      newEvent = new CustomEvent("add-filter", { bubbles: true, detail: event.target.value });
-    } else {
-      newEvent = new CustomEvent("remove-filter", { bubbles: true, detail: event.target.value });
-    }
+    const newEvent = new CustomEvent(
+      event.target.checked? "add-filter" : "remove-filter",
+      { 
+        bubbles: true,
+         detail: event.target.value 
+      }
+    );
     event.target.dispatchEvent(newEvent);
   }
 
