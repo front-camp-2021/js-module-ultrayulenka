@@ -1,0 +1,66 @@
+html, body {
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: lightgoldenrodyellow ;
+}
+main {
+  height: 100%;
+  margin: 0 20px;
+}
+form {
+  margin: 20px 0;
+}
+textarea {
+  width: 90%;
+}
+.images {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 24px;
+}
+#red {
+  width: 200px;
+  height: 200px;
+  padding: 40px;
+  background: red;
+  box-sizing: border-box;
+}
+
+#orange {
+  height: 100%;
+  padding: 40px;
+  background: orange;
+  box-sizing: border-box;
+}
+
+#blue {
+  height: 100%;
+  background: blue;
+}
+
+#green {
+  width: 300px;
+  height: 300px;
+  background: darkolivegreen;
+  position: relative;
+}
+
+#grey {
+  width: 150px;
+  height: 150px;
+  background: darkgrey;
+  position: absolute;
+  top: 20px;
+  left: 100px;
+}
+
+#yellow {
+  width: 50px;
+  height: 50px;
+  background: yellow;
+  position: absolute;
+  bottom: 30px;
+  left: 50px
+}

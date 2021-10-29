@@ -6,6 +6,7 @@
   "scripts": {
     "test": "cross-env NODE_ICU_DATA=node_modules/full-icu jest",
     "start:backend": "npm run json-server --watch ./server/db.json",
+    "start:client": "static-server ./",
     "json-server": "json-server",
     "lint": "eslint \"./src/**/*.js\""
   },
@@ -25,6 +26,10 @@
     "jest": "^27.0.6",
     "jest-fetch-mock": "^3.0.3",
     "json-server": "^0.16.3",
-    "pretty-format": "^26.6.2"
+    "pretty-format": "^26.6.2",
+    "static-server": "^2.2.1"
+  },
+  "dependencies": {
+    "enzyme": "^3.11.0"
   }
 }

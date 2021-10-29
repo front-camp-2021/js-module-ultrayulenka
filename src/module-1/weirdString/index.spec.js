@@ -7,5 +7,8 @@ describe("weirdString", () => {
 
     const result2 = weirdString("");
     expect(result2).toEqual("");
+
+    const result3 = weirdString("MY NAME IS BOB");
+    expect(result3).toEqual("My NAMe Is BOb");
   });
 });
